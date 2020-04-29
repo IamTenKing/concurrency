@@ -1,5 +1,6 @@
 package com.example.concurrency_demo.mapper;
 
+import com.example.concurrency_demo.entity.Lock;
 import com.example.concurrency_demo.entity.Order;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -13,11 +14,7 @@ import java.util.List;
  * @date 2020-4-27
  */
 @Component
-public interface OrderMapper extends Mapper<Order>, MySqlMapper<Order> {
+public interface LockTableMapper extends Mapper<Lock>, MySqlMapper<Lock> {
 
-    List<Order> selectOrderForUpdate(@Param("n")Long n);
-
-    Order selectMax();
-
-    void insertOrder(Order order1, int version);
+    List<Order> selectLockForUpdate(@Param("name") String  name);
 }

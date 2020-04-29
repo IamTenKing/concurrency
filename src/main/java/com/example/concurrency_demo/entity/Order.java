@@ -22,4 +22,5 @@ public class Order implements Serializable {
     private String name;
     private Long num;
 
+    private int version;
 }
