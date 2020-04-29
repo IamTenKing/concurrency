@@ -11,6 +11,8 @@ import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.redisson.RedissonRedLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -44,6 +46,11 @@ public class LockController {
 
     static ZkDistributedLockTemplate zkLock = null;
 
+    @Autowired
+    RedissonRedLock redLock;
+
+
+
 //    static {
 //
 //        RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
@@ -52,6 +59,9 @@ public class LockController {
 //
 //         zkLock=new ZkDistributedLockTemplate(client);
 //    }
+
+
+
 
     ReentrantLock reentrantLock =  new ReentrantLock();
 
@@ -95,6 +105,30 @@ public class LockController {
         }finally {
             lock.unlock();
         }
+
+    }
+
+    @GetMapping("/testRedisLock2")
+    public void testRedisLock2(){
+        // 红锁在大部分节点上加锁成功就算成功，且设置总超时时间以及单个节点超时时间
+        try {
+            System.out.println("===============");
+            boolean b = redLock.tryLock(10, 1, TimeUnit.SECONDS);
+            if(b){
+                Order order = mapper.selectMax();
+                Order order1 = new Order();
+                order1.setNum(order==null?1:order.getNum()+1);
+                order1.setName("test");
+                mapper.insert(order1);
+            }
+
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }finally {
+            redLock.unlock();
+        }
+
 
     }
 
